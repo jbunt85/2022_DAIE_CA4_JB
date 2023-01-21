@@ -1,0 +1,396 @@
+---
+title: "Data Analysis CA 4 - Database Design & SQL Querying"
+subtitle: "Part A: Deliverable 1 - Generate"
+author: "James Bunt (D00262403)"
+output: 
+  html_document:
+date: "January 2023"
+---
+
+# E-R Diagram of the logical data model using Vertabelo
+Here is the E-R diagram of the logical data model describing the structure of my database, created in Vertabelo (2023).
+![](myca4dbv4.png)
+
+```{r setup, echo=FALSE, include=FALSE}
+# Clear the console on each execution
+cat("\014")
+
+# Downloading and loading the relevant libraries to help with the deliverable
+library(pacman)
+pacman::p_load(dbplyr,RSQLite,rmarkdown)
+
+# Remove the SQLite file if it exists before creating the tables
+dbfile <- "ca4-db.sqlite"
+if (file.exists(dbfile)) {
+  file.remove(dbfile)
+}
+
+# Create and connect the local SQLite database file
+ca4_db <- dbConnect(RSQLite::SQLite(), dbfile)
+
+# Create tables in the database using the SQL from the Vertabelo generated script
+return <- dbExecute(ca4_db,"CREATE TABLE Asset (
+    Id integer NOT NULL CONSTRAINT Asset_pk PRIMARY KEY,
+    AssetType_Id integer NOT NULL,
+    Description varchar(250) NOT NULL,
+    CONSTRAINT Asset_AssetType FOREIGN KEY (AssetType_Id)
+    REFERENCES AssetType (Id)
+    )")
+
+return <- dbExecute(ca4_db,"CREATE TABLE AssetType (
+    Id integer NOT NULL CONSTRAINT AssetType_pk PRIMARY KEY,
+    Name varchar(50) NOT NULL
+)")
+
+return <- dbExecute(ca4_db,"CREATE TABLE AssetsPerLibrary (
+    Library_Id integer NOT NULL,
+    Asset_Id integer NOT NULL,
+    CONSTRAINT AssetsPerLibrary_pk PRIMARY KEY (Library_Id,Asset_Id),
+    CONSTRAINT AssetsPerLibrary_Library FOREIGN KEY (Library_Id)
+    REFERENCES Library (Id),
+    CONSTRAINT AssetsPerLibrary_Asset FOREIGN KEY (Asset_Id)
+    REFERENCES Asset (Id)
+)")
+
+return <- dbExecute(ca4_db,"CREATE TABLE AssetsinProject (
+    Project_Id integer NOT NULL,
+    Asset_Id integer NOT NULL,
+    CONSTRAINT AssetsinProject_pk PRIMARY KEY (Project_Id,Asset_Id),
+    CONSTRAINT AssetsinProject_Project FOREIGN KEY (Project_Id)
+    REFERENCES Project (Id),
+    CONSTRAINT AssetsinProject_Asset FOREIGN KEY (Asset_Id)
+    REFERENCES Asset (Id)
+)")
+
+return <- dbExecute(ca4_db,"CREATE TABLE Library (
+    Id integer NOT NULL CONSTRAINT Library_pk PRIMARY KEY,
+    Name varchar(50) NOT NULL
+)")
+
+return <- dbExecute(ca4_db,"CREATE TABLE Project (
+    Id integer NOT NULL CONSTRAINT Project_pk PRIMARY KEY,
+    Name varchar(50) NOT NULL,
+    DueDate date NOT NULL
+)")
+
+return <- dbExecute(ca4_db,"CREATE TABLE Skill (
+    Id integer NOT NULL CONSTRAINT Skill_pk PRIMARY KEY,
+    Name varchar(50) NOT NULL
+)")
+
+return <- dbExecute(ca4_db,"CREATE TABLE SkillsPerMember (
+    Skill_Id integer NOT NULL,
+    TeamMember_Id integer NOT NULL,
+    CONSTRAINT SkillsPerMember_pk PRIMARY KEY (Skill_Id,TeamMember_Id),
+    CONSTRAINT SkillsPerMember_Skill FOREIGN KEY (Skill_Id)
+    REFERENCES Skill (Id),
+    CONSTRAINT SkillsPerMember_TeamMember FOREIGN KEY (TeamMember_Id)
+    REFERENCES TeamMember (Id)
+)")
+
+return <- dbExecute(ca4_db,"CREATE TABLE Team (
+    Id integer NOT NULL CONSTRAINT Team_pk PRIMARY KEY,
+    Name varchar(50) NOT NULL
+)")
+
+return <- dbExecute(ca4_db,"CREATE TABLE TeamMember (
+    Id integer NOT NULL CONSTRAINT TeamMember_pk PRIMARY KEY,
+    Team_Id integer NOT NULL,
+    FirstName varchar(50) NOT NULL,
+    LastName varchar(50) NOT NULL,
+    MiddleName varchar(50) NOT NULL,
+    CONSTRAINT TeamMember_Team FOREIGN KEY (Team_Id)
+    REFERENCES Team (Id)
+)")
+
+return <- dbExecute(ca4_db,"CREATE TABLE TeamPerProject (
+    Project_Id integer NOT NULL,
+    Team_Id integer NOT NULL,
+    CONSTRAINT TeamPerProject_pk PRIMARY KEY (Team_Id,Project_Id),
+    CONSTRAINT TeamPerProject_Project FOREIGN KEY (Project_Id)
+    REFERENCES Project (Id),
+    CONSTRAINT TeamPerProject_Team FOREIGN KEY (Team_Id)
+    REFERENCES Team (Id)
+)")
+
+return <- dbExecute(ca4_db,"CREATE TABLE WorkItem (
+    Id integer NOT NULL CONSTRAINT WorkItem_pk PRIMARY KEY,
+    Project_Id integer NOT NULL,
+    Asset_Id integer NOT NULL,
+    TeamMember_Id integer NOT NULL,
+    Description varchar(250) NOT NULL,
+    CONSTRAINT WorkItem_Project FOREIGN KEY (Project_Id)
+    REFERENCES Project (Id),
+    CONSTRAINT WorkItem_Asset FOREIGN KEY (Asset_Id)
+    REFERENCES Asset (Id),
+    CONSTRAINT WorkItem_TeamMember FOREIGN KEY (TeamMember_Id)
+    REFERENCES TeamMember (Id)
+)")
+
+# return <- dbExecute(ca4_db,"")
+
+# Create the views to demonstrate inner joins
+
+return <- dbExecute(ca4_db,"CREATE VIEW TeamMembers AS
+SELECT
+    Team.Name,
+    TeamMember.FirstName,
+    TeamMember.MiddleName,
+    TeamMember.LastName
+FROM
+ Team
+INNER JOIN TeamMember ON 
+ Team.Id = TeamMember.Team_Id
+ORDER BY
+ Team.Name,
+    TeamMember.LastName;")
+
+return <- dbExecute(ca4_db,"CREATE VIEW AssetPerProject AS
+SELECT
+ Project.Name AS Project_Name,
+    Asset.Description,
+    AssetType.Name
+FROM
+ Asset
+INNER JOIN AssetType ON Asset.AssetType_Id = AssetType.Id
+INNER JOIN AssetInProject ON Asset.Id = AssetsInProject.Asset_Id
+INNER JOIN Project ON AssetsInProject.Id = Project.Id
+ORDER BY
+ Project.Name,
+    Asset.Description;")
+
+return <- dbExecute(ca4_db,"CREATE VIEW AssetsInLibrary AS
+SELECT
+ Library.Name AS LibraryName,
+    Asset.Description,
+    AssetType.Name
+FROM
+ Asset
+INNER JOIN AssetType ON Asset.AssetType_Id = AssetType.Id
+INNER JOIN AssetsPerLibrary ON Asset.Id = AssetsPerLibrary.Asset_Id
+INNER JOIN Library ON AssetsPerLibrary.Library_Id = Library.Id;")
+
+## Populate tables with data
+
+# populate AssetType table
+return <- dbExecute(ca4_db,"INSERT INTO AssetType
+                              (Id, Name)
+                              VALUES
+                              (1, '3D Character')")
+return <- dbExecute(ca4_db,"INSERT INTO AssetType
+                              (Id, Name)
+                              VALUES
+                              (2, '3D Prop')")
+return <- dbExecute(ca4_db,"INSERT INTO AssetType
+                              (Id, Name)
+                              VALUES
+                              (3, 'Concept Art')")
+
+# populate Asset table
+return <- dbExecute(ca4_db,"INSERT INTO Asset
+                              (Id, AssetType_Id, Description)
+                              VALUES
+                              (1, 1, 'Golden Hero')")
+return <- dbExecute(ca4_db,"INSERT INTO Asset
+                              (Id, AssetType_Id, Description)
+                              VALUES
+                              (2, 1, 'Red Villian')")
+return <- dbExecute(ca4_db,"INSERT INTO Asset
+                              (Id, AssetType_Id, Description)
+                              VALUES
+                              (3, 2, 'Blue Sword')")
+return <- dbExecute(ca4_db,"INSERT INTO Asset
+                              (Id, AssetType_Id, Description)
+                              VALUES
+                              (4, 2, 'Small Shield')")
+return <- dbExecute(ca4_db,"INSERT INTO Asset
+                              (Id, AssetType_Id, Description)
+                              VALUES
+                              (5, 2, 'Red Armour')")
+return <- dbExecute(ca4_db,"INSERT INTO Asset
+                              (Id, AssetType_Id, Description)
+                              VALUES
+                              (6, 2, 'Blue Armour')")
+
+# populate Library table
+return <- dbExecute(ca4_db,"INSERT INTO Library
+                              (Id, Name)
+                              VALUES
+                              (1, '3D Props')")
+return <- dbExecute(ca4_db,"INSERT INTO Library
+                              (Id, Name)
+                              VALUES
+                              (2, '3D Characters')")
+return <- dbExecute(ca4_db,"INSERT INTO Library
+                              (Id, Name)
+                              VALUES
+                              (3, '3D Concepts')")
+
+# populate AssetsPerLibrary table
+return <- dbExecute(ca4_db,"INSERT INTO AssetsPerLibrary
+                              (Library_Id, Asset_ID)
+                              VALUES
+                              (1, 3)")
+return <- dbExecute(ca4_db,"INSERT INTO AssetsPerLibrary
+                              (Library_Id, Asset_ID)
+                              VALUES
+                              (1, 4)")
+return <- dbExecute(ca4_db,"INSERT INTO AssetsPerLibrary
+                              (Library_Id, Asset_ID)
+                              VALUES
+                              (2, 1)")
+return <- dbExecute(ca4_db,"INSERT INTO AssetsPerLibrary
+                              (Library_Id, Asset_ID)
+                              VALUES
+                              (2, 2)")
+return <- dbExecute(ca4_db,"INSERT INTO AssetsPerLibrary
+                              (Library_Id, Asset_ID)
+                              VALUES
+                              (3, 5)")
+return <- dbExecute(ca4_db,"INSERT INTO AssetsPerLibrary
+                              (Library_Id, Asset_ID)
+                              VALUES
+                              (3, 6)")
+
+# populate TeamMember table
+return <- dbExecute(ca4_db,"INSERT INTO TeamMember
+                              (Id, Team_Id, FirstName, MiddleName, LastName)
+                              VALUES
+                              (1, 1, 'Andrew', 'Awesome', 'Apple')")
+return <- dbExecute(ca4_db,"INSERT INTO TeamMember
+                              (Id, Team_Id, FirstName, MiddleName, LastName)
+                              VALUES
+                              (2, 1, 'Beth', 'Barbs', 'Barker')")
+return <- dbExecute(ca4_db,"INSERT INTO TeamMember
+                              (Id, Team_Id, FirstName, MiddleName, LastName)
+                              VALUES
+                              (3, 2, 'Candy', 'Crazy', 'Curtis')")
+return <- dbExecute(ca4_db,"INSERT INTO TeamMember
+                              (Id, Team_Id, FirstName, MiddleName, LastName)
+                              VALUES
+                              (4, 2, 'Derek', 'Dozy', 'Davidson')")
+
+# populate Team table
+return <- dbExecute(ca4_db,"INSERT INTO Team
+                              (Id, Name)
+                              VALUES
+                              (1, 'Design')")
+return <- dbExecute(ca4_db,"INSERT INTO Team
+                              (Id, Name)
+                              VALUES
+                              (2, 'Development')")
+
+# populate Skill table
+return <- dbExecute(ca4_db,"INSERT INTO Skill
+                              (Id, Name)
+                              VALUES
+                              (1, 'Coding')")
+return <- dbExecute(ca4_db,"INSERT INTO Skill
+                              (Id, Name)
+                              VALUES
+                              (2, 'Animation')")
+return <- dbExecute(ca4_db,"INSERT INTO Skill
+                              (Id, Name)
+                              VALUES
+                              (3, 'Modelling')")
+return <- dbExecute(ca4_db,"INSERT INTO Skill
+                              (Id, Name)
+                              VALUES
+                              (4, 'Project Management')")
+
+# populate SkillsPerMember table
+return <- dbExecute(ca4_db,"INSERT INTO SkillsPerMember
+                              (Skill_Id, TeamMember_Id)
+                              VALUES
+                              (1, 1)")
+return <- dbExecute(ca4_db,"INSERT INTO SkillsPerMember
+                              (Skill_Id, TeamMember_Id)
+                              VALUES
+                              (1, 2)")
+return <- dbExecute(ca4_db,"INSERT INTO SkillsPerMember
+                              (Skill_Id, TeamMember_Id)
+                              VALUES
+                              (1, 3)")
+return <- dbExecute(ca4_db,"INSERT INTO SkillsPerMember
+                              (Skill_Id, TeamMember_Id)
+                              VALUES
+                              (2, 2)")
+return <- dbExecute(ca4_db,"INSERT INTO SkillsPerMember
+                              (Skill_Id, TeamMember_Id)
+                              VALUES
+                              (3, 3)")
+return <- dbExecute(ca4_db,"INSERT INTO SkillsPerMember
+                              (Skill_Id, TeamMember_Id)
+                              VALUES
+                              (4, 4)")
+
+# populate Project table
+return <- dbExecute(ca4_db,"INSERT INTO Project
+                              (Id, Name, DueDate)
+                              VALUES
+                              (1, 'Easter Hunt', '2023-03-01')")
+return <- dbExecute(ca4_db,"INSERT INTO Project
+                              (Id, Name, DueDate)
+                              VALUES
+                              (2, 'Summer Mayhem', '2023-06-01')")
+
+# populate WorkItem table
+return <- dbExecute(ca4_db,"INSERT INTO WorkItem
+                              (Id, Project_Id, Asset_Id, TeamMember_Id, Description)
+                              VALUES
+                              (1, 1, 1, 1, 'Build a castle')")
+return <- dbExecute(ca4_db,"INSERT INTO WorkItem
+                              (Id, Project_Id, Asset_Id, TeamMember_Id, Description)
+                              VALUES
+                              (2, 1, 2, 2, 'Fight training')")
+return <- dbExecute(ca4_db,"INSERT INTO WorkItem
+                              (Id, Project_Id, Asset_Id, TeamMember_Id, Description)
+                              VALUES
+                              (3, 2, 3, 3, 'Ride a horse')")
+return <- dbExecute(ca4_db,"INSERT INTO WorkItem
+                              (Id, Project_Id, Asset_Id, TeamMember_Id, Description)
+                              VALUES
+                              (4, 2, 4, 4, 'Defeat the dragon')")
+
+# populate AssetsinProject table
+return <- dbExecute(ca4_db,"INSERT INTO AssetsinProject
+                              (Project_Id, Asset_ID)
+                              VALUES
+                              (1, 1)")
+return <- dbExecute(ca4_db,"INSERT INTO AssetsinProject
+                              (Project_Id, Asset_ID)
+                              VALUES
+                              (1, 2)")
+return <- dbExecute(ca4_db,"INSERT INTO AssetsinProject
+                              (Project_Id, Asset_ID)
+                              VALUES
+                              (2, 3)")
+return <- dbExecute(ca4_db,"INSERT INTO AssetsinProject
+                              (Project_Id, Asset_ID)
+                              VALUES
+                              (2, 4)")
+return <- dbExecute(ca4_db,"INSERT INTO AssetsinProject
+                              (Project_Id, Asset_ID)
+                              VALUES
+                              (2, 5)")
+return <- dbExecute(ca4_db,"INSERT INTO AssetsinProject
+                              (Project_Id, Asset_ID)
+                              VALUES
+                              (2, 6)")
+
+# populate TeamPerProject table
+return <- dbExecute(ca4_db,"INSERT INTO TeamPerProject
+                              (Project_Id, Team_ID)
+                              VALUES
+                              (1, 1)")
+return <- dbExecute(ca4_db,"INSERT INTO TeamPerProject
+                              (Project_Id, Team_ID)
+                              VALUES
+                              (2, 2)")
+
+```
+
+```{r echo=FALSE}
+# Disconnect the database
+dbDisconnect(ca4_db)
+```
