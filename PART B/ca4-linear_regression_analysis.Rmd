@@ -1,21 +1,100 @@
 ---
-title: "R Notebook"
+title: "Data Analysis CA 4 - Linear Regression Analysis"
+author: "James Bunt (D00262403)"
+date: "January 2023"
 output:
-  html_document:
-    df_print: paged
+  html_document: null
+  pdf_document: default
+subtitle: "Part B: Linear Regression Analysis"
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+```{r setup and library load, include=FALSE}
 
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+# Clear the console
+cat('\014')
 
-```{r}
-plot(cars)
+# Load necessary packages
+library("ggplot2")
 ```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+---
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+## Introduction
+I will be performing simple linear regression from a survey of gamer preferences across 250 undergraduate students. Of the 11 columns within the dataset, 2 columns will be used in this analysis on a random sample of 200 records. I will be analysing whether the two variables 'age' (independent variable) and 'avg_monthly_hrs_gaming' (dependent variable) are correlated.
 
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+## Assumptions
+Simple linear regression is a parametric test, meaning that it makes certain assumptions about the data. These assumptions are:
+
+1. Homogeneity of variance (homoscedasticity): the size of the error in our prediction doesn’t change significantly across the values of the independent variable, which is validated in this data.
+2. Independence of observations: the observations in the dataset were collected using statistically valid sampling methods, and there are no hidden relationships among observations, which is validated in this data.
+3. Normality: The data follows a normal distribution.
+4. Relationship between the independent and dependent variable is linear.
+
+In summary, this data does meet the above assumptions of homoscedasticity and normality therefore analysis can commence as follows.
+
+---
+
+## Loading and Randomly Sampling the Data
+```{r Load Data, echo=TRUE}
+
+# Load data from the csv file
+file_name <- "./amalgamated_game_survey_250_2022.csv"
+game_survey_data <- read.csv(file_name)
+
+# Set random seed for reproducibility and randomness
+set.seed(sample(1:1e+05, 1))
+
+# Select a random sample of 200 records from the data
+sample_rows <- sample(1:nrow(game_survey_data), 200, replace = FALSE)
+sample <- game_survey_data[sample_rows, ]
+```
+
+---
+
+## 1. Histogram of 'age' versus 'average monthly hours gaming'
+```{r Histogram, echo=TRUE}
+# Create a base plot using the sample data
+ggplot(data = sample, aes(x = age)) +
+# Add a histogram layer to the plot
+geom_histogram(bins = 30, fill = "lightblue") +
+# Add labels to the plot
+labs(x = "Age", y = "Frequency", title = "Histogram of age")
+
+
+# Create a base plot using the sample data
+ggplot(data = sample, aes(x = avg_monthly_hrs_gaming)) +
+# Add a histogram layer to the plot
+geom_histogram(bins = 30, fill = "lightblue") +
+# Add labels to the plot
+labs(x = "Average monthly hours spent gaming", y = "Frequency", title = "Histogram of average monthly hours spent gaming")
+
+```
+
+## 2: Sharpio-Wilk test
+
+The data is uniform as the data points are spread out evenly across the graph.
+
+```{r}
+
+# Load necessary libraries
+library(ggplot2)
+library(readxl)
+
+# Shapiro-Wilk test for age variable
+shapiro.test(sample$age)
+
+# Shapiro-Wilk test for avg_monthly_hrs_gaming variable
+shapiro.test(sample$avg_monthly_hrs_gaming)
+
+# create normal probability plot for age variable
+qqnorm(sample$age)
+qqline(sample$age)
+
+# create normal probability plot for avg_monthly_hrs_gaming variable
+qqnorm(sample$avg_monthly_hrs_gaming)
+qqline(sample$avg_monthly_hrs_gaming)
+```
+
+---
+
 
