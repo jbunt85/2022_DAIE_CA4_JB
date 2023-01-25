@@ -13,13 +13,8 @@ jbunt-da-ca4
 
 ---
 
-### Repository on Github:
-##### Description: R Source Code Repository
-##### Link: https://github.com/jbunt85/jbunt-da-ca4
-
----
-
-### Additional Files:
+### Links & Additional Files:
+##### Repository on Github: https://github.com/jbunt85/jbunt-da-ca4
 ##### Zip file with all assets: https://github.com/jbunt85/2022_DAIE_CA4_JB/blob/main/2022_DAIE_CA4_JB.zip
 ##### Coversheet: https://github.com/jbunt85/2022_DAIE_CA4_JB/blob/main/Cover_Sheet_CA4_JBUNT.pdf
 
