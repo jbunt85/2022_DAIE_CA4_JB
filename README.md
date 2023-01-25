@@ -14,27 +14,27 @@ jbunt-da-ca4
 ---
 
 ### Repository on Github:
-Description: R Source Code Repository
-Link: https://github.com/jbunt85/jbunt-da-ca4
+##### Description: R Source Code Repository
+##### Link: https://github.com/jbunt85/jbunt-da-ca4
 
 ---
 
 ### Additional Files:
-Zip file with all assets: xxx
-Coversheet: https://github.com/jbunt85/2022_DAIE_CA4_JB/blob/main/Cover_Sheet_CA4_JBUNT.pdf
+##### Zip file with all assets: xxx
+##### Coversheet: https://github.com/jbunt85/2022_DAIE_CA4_JB/blob/main/Cover_Sheet_CA4_JBUNT.pdf
 
 ---
 
 ### Part A: Database Design & SQL Querying
-SQL Script (Vertabelo): https://github.com/jbunt85/jbunt-da-ca4/blob/main/PART%20A/CA4-db_create.sql
-E-R Diagram (Vertabelo): https://github.com/jbunt85/jbunt-da-ca4/blob/main/PART%20A/myca4dbv4.png
-SQLite Database File (R Studio - Generate): https://github.com/jbunt85/jbunt-da-ca4/blob/main/PART%20A/rdbms-create.Rmd
-SQLite Database File (R Studio - Query): https://github.com/jbunt85/jbunt-da-ca4/blob/main/PART%20A/rdbms-query2.Rmd
+##### SQL Script (Vertabelo): https://github.com/jbunt85/jbunt-da-ca4/blob/main/PART%20A/CA4-db_create.sql
+##### E-R Diagram (Vertabelo): https://github.com/jbunt85/jbunt-da-ca4/blob/main/PART%20A/myca4dbv4.png
+##### SQLite Database File (R Studio - Generate): https://github.com/jbunt85/jbunt-da-ca4/blob/main/PART%20A/rdbms-create.Rmd
+##### SQLite Database File (R Studio - Query): https://github.com/jbunt85/jbunt-da-ca4/blob/main/PART%20A/rdbms-query2.Rmd
 
 ---
 
 ### Part B: Linear Regression Analysis
-R Notebook - R Studio: https://github.com/jbunt85/jbunt-da-ca4/blob/main/PART%20B/ca4-linear_regression_analysis.Rmd
-R Notebook - PDF: https://github.com/jbunt85/jbunt-da-ca4/blob/main/PART%20B/ca4-linear_regression_analysis.pdf
+##### R Notebook - R Studio: https://github.com/jbunt85/jbunt-da-ca4/blob/main/PART%20B/ca4-linear_regression_analysis.Rmd
+##### R Notebook - PDF: https://github.com/jbunt85/jbunt-da-ca4/blob/main/PART%20B/ca4-linear_regression_analysis.pdf
 
 ---
