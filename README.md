@@ -19,9 +19,9 @@ Link: https://github.com/jbunt85/jbunt-da-ca4
 
 ---
 
-### One Drive:
+### Additional Files:
 Zip file with all assets: xxx
-Coversheet: xxx
+Coversheet: https://github.com/jbunt85/2022_DAIE_CA4_JB/blob/main/Cover_Sheet_CA4_JBUNT.pdf
 
 ---
 
